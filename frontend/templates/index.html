@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Safety Complaint Generator</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>Safety Complaint Generator</h1>
+
+        <p>
+            Submit your complaint in Hindi or English
+        </p>
+
+    </div>
+
+    {% if error %}
+
+<div class="card">
+
+    <div class="result-box">
+        {{ error }}
+    </div>
+
+</div>
+
+{% endif %}
+    <!-- COMPLAINT FORM -->
+
+    <div class="card">
+
+        <form action="/submit" method="POST">
+
+
+            <!-- LANGUAGE -->
+
+            <div class="form-group">
+
+                <label for="language">
+                    Language
+                </label>
+
+                <select
+                    id="language"
+                    name="language"
+                    required
+                >
+
+                    <option value="English">
+                        English
+                    </option>
+
+                    <option value="Hindi">
+                        Hindi
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- COMPLAINT -->
+
+            <div class="form-group">
+
+                <label for="complaint">
+                    Complaint
+                </label>
+
+                <textarea
+                    id="complaint"
+                    name="complaint"
+                    rows="7"
+                    placeholder="Enter your complaint here..."
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <!-- DATE + TIME -->
+
+            <div class="form-row">
+
+
+                <div class="form-group">
+
+                    <label for="date">
+                        Date
+                    </label>
+
+                   <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    max="{{ today }}"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="time">
+                        Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="time"
+                        name="time"
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="form-group">
+
+                <label for="location">
+                    Location
+                </label>
+
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="Enter location"
+                >
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button type="submit" id="submitButton">
+    Submit Complaint
+</button>
+
+<p id="loadingMessage" style="display: none;">
+    Processing your complaint... Please wait.
+</p>
+
+
+        </form>
+
+    </div>
+
+
+
+    <!-- RESULTS -->
+
+    {% if result %}
+
+    <div class="card">
+
+        <h2 class="result-title">
+            Complaint Analysis
+        </h2>
+
+        <div class="result-section">
+
+    <h3>
+        Incident Details
+    </h3>
+
+    <div class="result-box">
+
+        <p>
+            <strong>Date:</strong>
+            {{ result.date if result.date else "Not provided" }}
+        </p>
+
+        <p>
+            <strong>Time:</strong>
+            {{ result.time if result.time else "Not provided" }}
+        </p>
+
+        <p>
+            <strong>Location:</strong>
+            {{ result.location if result.location else "Not provided" }}
+        </p>
+
+    </div>
+
+</div>
+        <!-- CATEGORY -->
+
+        <div class="result-section">
+
+            <h3>
+                Predicted Category
+            </h3>
+
+            <div class="result-box category">
+
+                {{ result.category }}
+
+            </div>
+
+        </div>
+
+
+        <!-- CONFIDENCE -->
+
+        <div class="result-section">
+
+            <h3>
+                Confidence
+            </h3>
+
+            <div class="result-box confidence">
+
+    {{ (result.confidence * 100) | round(2) }}%
+
+</div>
+
+        </div>
+
+
+        <!-- ENTITIES -->
+
+        <div class="result-section">
+
+            <h3>
+                Extracted Entities
+            </h3>
+
+            <div class="result-box">
+
+                <ul class="entity-list">
+
+                    <li>
+                        <strong>Persons:</strong>
+                        {{ result.entities.persons }}
+                    </li>
+
+                    <li>
+                        <strong>Locations:</strong>
+                        {{ result.entities.locations }}
+                    </li>
+
+                    <li>
+                        <strong>Organizations:</strong>
+                        {{ result.entities.organizations }}
+                    </li>
+
+                    <li>
+                        <strong>Dates:</strong>
+                        {{ result.entities.dates }}
+                    </li>
+
+                    <li>
+                        <strong>Times:</strong>
+                        {{ result.entities.times }}
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- SAFETY ADVICE -->
+
+        <div class="result-section">
+
+            <h3>
+                Safety Advice
+            </h3>
+
+            <div class="result-box">
+
+                {{ result.safety_advice }}
+
+            </div>
+
+        </div>
+
+
+        <!-- FORMAL ENGLISH -->
+
+        <div class="result-section">
+
+            <h3>
+                Formal English Complaint
+            </h3>
+
+            <div class="result-box">
+
+    <p id="englishComplaint">
+        {{ result.formal_english }}
+    </p>
+
+    <button
+        type="button"
+        onclick="copyText('englishComplaint')"
+    >
+        Copy English Complaint
+    </button>
+
+</div>
+
+        </div>
+        <!-- SIMILAR COMPLAINTS -->
+
+<div class="result-section">
+
+    <h3>
+        Similar Historical Complaints
+    </h3>
+
+    {% if result.similar_complaints %}
+
+        {% for complaint in result.similar_complaints %}
+
+        <div class="result-box" style="margin-bottom: 10px;">
+
+            <p>
+                <strong>Complaint:</strong>
+                {{ complaint.complaint }}
+            </p>
+
+            <p>
+                <strong>Category:</strong>
+                {{ complaint.category }}
+            </p>
+
+            <p>
+                <strong>Similarity Score:</strong>
+                {{ complaint.similarity_score }}
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="result-box">
+            No similar historical complaints found.
+        </div>
+
+    {% endif %}
+
+</div>
+
+        <!-- FORMAL HINDI -->
+
+        <div class="result-section">
+
+            <h3>
+                Formal Hindi Complaint
+            </h3>
+
+            <div class="result-box">
+
+    <p id="hindiComplaint">
+        {{ result.formal_hindi }}
+    </p>
+
+    <button
+        type="button"
+        onclick="copyText('hindiComplaint')"
+    >
+        Copy Hindi Complaint
+    </button>
+
+</div>
+
+        </div>
+
+
+    </div>
+
+    {% endif %}
+
+
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
