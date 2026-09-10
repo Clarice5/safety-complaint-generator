@@ -50,12 +50,25 @@ def extract_entities(text):
             entities["organizations"].append(ent.text)
 
         elif ent.label_ == "DATE":
+    # Ignore frequency expressions that spaCy may classify as dates
+            frequency_terms = [
+        "every day",
+        "every week",
+        "every month",
+        "daily",
+        "weekly",
+        "monthly",
+        "each day",
+        "each week",
+        "each month"
+    ]
 
-            entities["dates"].append(ent.text)
+    if ent.text.lower().strip() not in frequency_terms:
+        entities["dates"].append(ent.text)
 
-        elif ent.label_ == "TIME":
+    elif ent.label_ == "TIME":
 
-            entities["times"].append(ent.text)
+         entities["times"].append(ent.text)
 
 
     # ------------------------------------------------

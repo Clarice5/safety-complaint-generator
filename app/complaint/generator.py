@@ -1,4 +1,7 @@
-from app.translation.translator import translate_hindi_to_english, translate_english_to_hindi
+from app.translation.translator import (
+    translate_hindi_to_english,
+    translate_english_to_hindi
+)
 from datetime import datetime
 
 
@@ -54,17 +57,17 @@ def generate_formal_complaint(
     readable_time = format_time(final_time)
 
     hindi_categories = {
-        "Blackmail": "ब्लैकमेल",
-        "Eve Teasing": "छेड़छाड़",
-        "Harassment": "उत्पीड़न",
-        "Domestic Violence": "घरेलू हिंसा",
-        "Public Safety": "सार्वजनिक सुरक्षा",
-        "Threat": "धमकी",
-        "Stalking": "पीछा करना",
-        "Cyber Harassment": "साइबर उत्पीड़न",
-        "Theft": "चोरी",
-        "Other": "अन्य"
-    }
+    "Blackmail": "ब्लैकमेल",
+    "Eve Teasing": "छेड़छाड़",
+    "Harassment": "उत्पीड़न",
+    "Domestic Violence": "घरेलू हिंसा",
+    "Public Safety": "सार्वजनिक सुरक्षा",
+    "Threat": "धमकी",
+    "Stalking": "पीछा किए जाने",
+    "Cyber Harassment": "साइबर उत्पीड़न",
+    "Theft": "चोरी",
+    "Other": "अन्य"
+}
 
     hindi_category = hindi_categories.get(category, "अन्य")
 
@@ -81,13 +84,22 @@ def generate_formal_complaint(
     # -------------------------
 
     english_complaint = (
-        f"I would like to formally report an incident involving {category.lower()}. "
+        f"I would like to formally report an incident involving "
+        f"{category.lower()}. "
         f"The incident occurred at {final_location} on {readable_date} "
         f"at {readable_time}. "
-        f"The incident involves {person}. "
+    )
+
+    if persons:
+        english_complaint += (
+            f"The incident involves {person}. "
+        )
+
+    english_complaint += (
         f"The details of the incident are as follows: "
         f"{english_details} "
-        f"I request that this matter be investigated and appropriate action be taken."
+        f"I request that this matter be investigated and appropriate "
+        f"action be taken."
     )
 
     # -------------------------
@@ -137,16 +149,24 @@ def generate_formal_complaint(
         if translated_person:
             hindi_person = translated_person
 
-    # Hindi complaint details are already translated above.
+    # Build Hindi complaint.
     hindi_complaint = (
-        f"मैं {hindi_category} से संबंधित एक घटना की औपचारिक शिकायत दर्ज "
-        f"करना चाहता/चाहती हूँ। "
-        f"यह घटना {hindi_date} को {hindi_time} बजे "
-        f"{hindi_location} पर हुई। "
-        f"इस घटना में {hindi_person} शामिल है। "
+    f"मैं {hindi_category} की घटना के संबंध में एक औपचारिक शिकायत दर्ज "
+    f"करना चाहता/चाहती हूँ। "
+    f"यह घटना {hindi_date} को {hindi_time} बजे "
+    f"{hindi_location} में हुई। "
+)
+
+    if persons:
+        hindi_complaint += (
+            f"इस घटना में {hindi_person} शामिल है। "
+        )
+
+    hindi_complaint += (
         f"घटना का विवरण इस प्रकार है: "
         f"{hindi_details} "
-        f"अतः मेरा अनुरोध है कि इस मामले की जांच की जाए और उचित कार्रवाई की जाए।"
+        f"अतः मेरा अनुरोध है कि इस मामले की जांच की जाए और उचित कार्रवाई "
+        f"की जाए।"
     )
 
     return {

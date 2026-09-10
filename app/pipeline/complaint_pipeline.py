@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from app.complaint.classifier import predict_category
 from app.pipeline.text_pipeline import process_complaint
 from app.ner.entity_extraction import extract_entities
 from app.complaint.advice import get_safety_advice
@@ -8,17 +8,6 @@ from app.similarity.complaint_similarity import find_similar_complaints
 from app.database.mongodb import save_complaint
 
 
-def predict_category(text):
-    """
-    Temporary classifier.
-
-    This will later be replaced by Anaya's ML model.
-    """
-
-    return {
-        "category": "Threat",
-        "confidence": 0.92
-    }
 
 
 def run_complaint_pipeline(
