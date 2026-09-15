@@ -9,6 +9,13 @@
 
     <title>Safety Complaint Generator</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
@@ -19,23 +26,41 @@
 
 <body>
 
-<div class="container">
+<!-- HERO HEADER (full-bleed, sits outside .container) -->
 
-    <!-- HEADER -->
+<div class="header">
 
-    <div class="header">
+    <div class="header-inner">
 
-        <h1>Safety Complaint Generator</h1>
+        <div class="header-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12 2.5l7.5 3v5.4c0 4.8-3.15 8.98-7.5 10.6-4.35-1.62-7.5-5.8-7.5-10.6V5.5l7.5-3z"
+                    stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+                />
+                <path d="M8.7 12.3l2.3 2.3 4.3-4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
 
-        <p>
-            Submit your complaint in Hindi or English
-        </p>
+        <div class="header-text">
+
+            <h1>Safety Complaint Generator</h1>
+
+            <p>
+                Submit your complaint in Hindi or English
+            </p>
+
+        </div>
 
     </div>
 
+</div>
+
+<div class="container">
+
     {% if error %}
 
-<div class="card">
+<div class="card card-error">
 
     <div class="result-box">
         {{ error }}
@@ -181,6 +206,42 @@
             Complaint Analysis
         </h2>
 
+        <!-- CATEGORY + CONFIDENCE SUMMARY -->
+
+        <div class="result-summary">
+
+            <div class="result-section">
+
+                <h3>
+                    Predicted Category
+                </h3>
+
+                <div class="result-box category">
+
+                    {{ result.category }}
+
+                </div>
+
+            </div>
+
+            <div class="result-section">
+
+                <h3>
+                    Confidence
+                </h3>
+
+                <div class="result-box confidence" style="--confidence: {{ (result.confidence * 100) | round(2) }}%;">
+
+    <span class="confidence-value">{{ (result.confidence * 100) | round(2) }}%</span>
+
+</div>
+
+            </div>
+
+        </div>
+
+        <div class="result-grid">
+
         <div class="result-section">
 
     <h3>
@@ -207,39 +268,6 @@
     </div>
 
 </div>
-        <!-- CATEGORY -->
-
-        <div class="result-section">
-
-            <h3>
-                Predicted Category
-            </h3>
-
-            <div class="result-box category">
-
-                {{ result.category }}
-
-            </div>
-
-        </div>
-
-
-        <!-- CONFIDENCE -->
-
-        <div class="result-section">
-
-            <h3>
-                Confidence
-            </h3>
-
-            <div class="result-box confidence">
-
-    {{ (result.confidence * 100) | round(2) }}%
-
-</div>
-
-        </div>
-
 
         <!-- ENTITIES -->
 
@@ -284,10 +312,12 @@
 
         </div>
 
+        </div>
+
 
         <!-- SAFETY ADVICE -->
 
-        <div class="result-section">
+        <div class="result-section result-section--advice">
 
             <h3>
                 Safety Advice
@@ -301,6 +331,7 @@
 
         </div>
 
+        <div class="result-grid">
 
         <!-- FORMAL ENGLISH -->
 
@@ -326,9 +357,37 @@
 </div>
 
         </div>
+
+        <!-- FORMAL HINDI -->
+
+        <div class="result-section">
+
+            <h3>
+                Formal Hindi Complaint
+            </h3>
+
+            <div class="result-box">
+
+    <p id="hindiComplaint">
+        {{ result.formal_hindi }}
+    </p>
+
+    <button
+        type="button"
+        onclick="copyText('hindiComplaint')"
+    >
+        Copy Hindi Complaint
+    </button>
+
+</div>
+
+        </div>
+
+        </div>
+
         <!-- SIMILAR COMPLAINTS -->
 
-<div class="result-section">
+<div class="result-section result-section--similar">
 
     <h3>
         Similar Historical Complaints
@@ -368,31 +427,6 @@
     {% endif %}
 
 </div>
-
-        <!-- FORMAL HINDI -->
-
-        <div class="result-section">
-
-            <h3>
-                Formal Hindi Complaint
-            </h3>
-
-            <div class="result-box">
-
-    <p id="hindiComplaint">
-        {{ result.formal_hindi }}
-    </p>
-
-    <button
-        type="button"
-        onclick="copyText('hindiComplaint')"
-    >
-        Copy Hindi Complaint
-    </button>
-
-</div>
-
-        </div>
 
 
     </div>

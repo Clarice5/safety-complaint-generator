@@ -4,7 +4,7 @@ import string
 import joblib
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-
+import numpy as np
 
 # Project root directory
 BASE_DIR = os.path.abspath(
@@ -70,24 +70,27 @@ def predict_category(text):
     """
     Predict complaint category and confidence.
     """
+    # 1. Fallback for empty input
+    if not text or not str(text).strip():
+        return {"category": "Uncategorized", "confidence": 0.0}
 
-    cleaned_text = preprocess_for_model(text)
+    # 2. Avoid double preprocessing if already cleaned
+    # (If 'text' is already cleaned, pass it directly; otherwise clean it)
+    cleaned_text = text if isinstance(text, str) and text.islower() else preprocess_for_model(text)
 
-    text_vector = vectorizer.transform(
-        [cleaned_text]
-    )
+    # 3. Vectorize text
+    text_vector = vectorizer.transform([cleaned_text])
 
-    predicted_category = model.predict(
-        text_vector
-    )[0]
+    # 4. Debug Check: If vocabulary match failed, log it in terminal
+    if text_vector.nnz == 0:
+        print(f"[WARNING] Classifier vectorizer matching 0 words for text: '{cleaned_text}'")
 
-    probabilities = model.predict_proba(
-        text_vector
-    )[0]
-
-    confidence = max(probabilities)
+    # 5. Predict class and probability
+    predicted_category = model.predict(text_vector)[0]
+    probabilities = model.predict_proba(text_vector)[0]
+    confidence = float(np.max(probabilities))
 
     return {
         "category": str(predicted_category),
-        "confidence": round(float(confidence), 2)
+        "confidence": round(confidence, 2)
     }
