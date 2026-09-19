@@ -56,30 +56,30 @@ def extract_entities(text):
             entities["times"].append(ent.text)
 
     # ------------------------------------------------
-    # Fallback for person names
+    # Fallback for person names (Updated to catch all matches)
     # ------------------------------------------------
-    person_pattern = re.search(
+    person_matches = re.finditer(
         r"\b([A-Z][a-z]+)\s+"
         r"(?:threatened|harassed|stalked|attacked|followed)"
         r"\b",
         text
     )
 
-    if person_pattern:
-        person = person_pattern.group(1)
+    for match in person_matches:
+        person = match.group(1)
         if person not in entities["persons"]:
             entities["persons"].insert(0, person)
 
     # ------------------------------------------------
-    # Fallback for location after "near"
+    # Fallback for location after "near" (Updated to catch all matches)
     # ------------------------------------------------
-    location_pattern = re.search(
+    location_matches = re.finditer(
         r"\bnear\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)",
         text
     )
 
-    if location_pattern:
-        location = location_pattern.group(1)
+    for match in location_matches:
+        location = match.group(1)
         # Remove words that obviously aren't location names
         location = re.split(
             r"\s+(?:on|at|in|for|and)\b",

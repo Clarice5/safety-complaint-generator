@@ -7,8 +7,10 @@ from nltk.tokenize import word_tokenize
 
 
 # Download required NLTK resources
-
-
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
+nltk.download('punkt_tab', quiet=True)
+nltk.download('wordnet', quiet=True)
 
 # Initialize tools
 stop_words = set(stopwords.words("english"))

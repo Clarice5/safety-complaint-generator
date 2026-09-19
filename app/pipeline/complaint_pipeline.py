@@ -8,8 +8,6 @@ from app.similarity.complaint_similarity import find_similar_complaints
 from app.database.mongodb import save_complaint
 
 
-
-
 def run_complaint_pipeline(
     complaint,
     language,
@@ -20,26 +18,17 @@ def run_complaint_pipeline(
     """
     Run the complete complaint processing pipeline.
     """
-
     # 1. Process language and text
-    processed = process_complaint(
-        complaint,
-        language
-    )
+    processed = process_complaint(complaint, language)
 
-    # 2. Get English text for ML and similarity
+    # 2. Get English text for ML, NER, and similarity
     english_text = processed["translated_text"]
 
-    # 3. Extract entities
-    entities = extract_entities(
-        english_text
-    )
+    # 3. Extract entities from translated English text
+    entities = extract_entities(english_text)
 
     # 4. Predict complaint category
-    prediction = predict_category(
-        processed["english_processed"]
-    )
-
+    prediction = predict_category(processed["english_processed"])
     category = prediction["category"]
     confidence = prediction["confidence"]
 
@@ -50,12 +39,10 @@ def run_complaint_pipeline(
         top_n=5
     )
 
-    # 6. Get Hindi safety advice
-    safety_advice = get_safety_advice(
-        category
-    )
+    # 6. Get safety advice
+    safety_advice = get_safety_advice(category)
 
-    # 7. Generate formal complaints
+    # 7. Generate formal complaints passing pre-translated English text
     formal_complaints = generate_formal_complaint(
         original_complaint=complaint,
         category=category,
@@ -63,56 +50,32 @@ def run_complaint_pipeline(
         language=language,
         date=date,
         time=time,
-        location=location
+        location=location,
+        translated_complaint=english_text
     )
 
     # 8. Create complete MongoDB record
     complaint_record = {
         "original_complaint": complaint,
         "language": language,
-
-        "hindi_processed": processed[
-            "hindi_processed"
-        ],
-
-        "translated_complaint": processed[
-            "translated_text"
-        ],
-
-        "english_processed": processed[
-            "english_processed"
-        ],
-
+        "hindi_processed": processed["hindi_processed"],
+        "translated_complaint": processed["translated_text"],
+        "english_processed": processed["english_processed"],
         "date": date,
         "time": time,
         "location": location,
-
         "category": category,
         "confidence": confidence,
-
         "entities": entities,
-
         "similar_complaints": similar_complaints,
-
         "safety_advice": safety_advice,
-
-        "formal_english": formal_complaints[
-            "formal_english"
-        ],
-
-        "formal_hindi": formal_complaints[
-            "formal_hindi"
-        ],
-
+        "formal_english": formal_complaints["formal_english"],
+        "formal_hindi": formal_complaints["formal_hindi"],
         "created_at": datetime.now()
     }
 
     # 9. Save complete record
-    document_id = save_complaint(
-        complaint_record
-    )
-
-    # 10. Return everything to the application
+    document_id = save_complaint(complaint_record)
     complaint_record["document_id"] = document_id
 
     return complaint_record

@@ -1,58 +1,66 @@
-from deep_translator import GoogleTranslator
+from functools import lru_cache
+import re
 import time
+from deep_translator import GoogleTranslator, MyMemoryTranslator
 
 
-def translate_hindi_to_english(text):
-    """
-    Translate Hindi text into English.
-    """
+def is_devanagari(text: str) -> bool:
+    """Check if string contains Devanagari (Hindi) script."""
+    if not text:
+        return False
+    return bool(re.search(r"[\u0900-\u097F]", str(text)))
 
+
+@lru_cache(maxsize=256)
+def translate_hindi_to_english(text: str) -> str:
     if not isinstance(text, str) or not text.strip():
         return ""
 
-    text = text.replace("।", "").strip()
+    # Clean Hindi full stops (Danda)
+    cleaned_text = text.replace("।", " . ").strip()
+    cleaned_text = re.sub(r"\s+", " ", cleaned_text)
 
-    for attempt in range(3):
-        try:
-            translated_text = GoogleTranslator(
-                source="hi",
-                target="en"
-            ).translate(text)
+    # 1. Primary: GoogleTranslator
+    try:
+        translated = GoogleTranslator(source="hi", target="en").translate(cleaned_text)
+        if translated and not is_devanagari(translated):
+            return translated
+    except Exception as e:
+        print(f"[TRANSLATOR WARNING] Google Hi->En failed: {e}")
 
-            if translated_text:
-                return translated_text
+    # 2. Fallback: MyMemoryTranslator (Uses full language names or ISO region codes)
+    try:
+        translated = MyMemoryTranslator(source="hindi", target="english").translate(cleaned_text)
+        if translated and not is_devanagari(translated):
+            return translated
+    except Exception as e:
+        print(f"[TRANSLATOR ERROR] MyMemory Hi->En failed: {e}")
 
-        except Exception as e:
-            print(
-                f"Hindi → English attempt {attempt + 1} failed: {e}"
-            )
-            time.sleep(2)
-
-    return ""
+    # 3. Last-resort fallback string
+    return text
 
 
-def translate_english_to_hindi(text):
-    """
-    Translate English text into Hindi.
-    """
-
+@lru_cache(maxsize=256)
+def translate_english_to_hindi(text: str) -> str:
     if not isinstance(text, str) or not text.strip():
         return ""
 
-    for attempt in range(3):
-        try:
-            translated_text = GoogleTranslator(
-                source="en",
-                target="hi"
-            ).translate(text)
+    cleaned_text = re.sub(r"\s+", " ", text).strip()
 
-            if translated_text:
-                return translated_text
+    # 1. Primary: GoogleTranslator
+    try:
+        translated = GoogleTranslator(source="en", target="hi").translate(cleaned_text)
+        if translated:
+            return translated
+    except Exception as e:
+        print(f"[TRANSLATOR WARNING] Google En->Hi failed: {e}")
 
-        except Exception as e:
-            print(
-                f"English → Hindi attempt {attempt + 1} failed: {e}"
-            )
-            time.sleep(2)
+    # 2. Fallback: MyMemoryTranslator
+    try:
+        translated = MyMemoryTranslator(source="english", target="hindi").translate(cleaned_text)
+        if translated:
+            return translated
+    except Exception as e:
+        print(f"[TRANSLATOR ERROR] MyMemory En->Hi failed: {e}")
 
-    return ""
+    return text

@@ -26,7 +26,7 @@
 
 <body>
 
-<!-- HERO HEADER (full-bleed, sits outside .container) -->
+<!-- HERO HEADER -->
 
 <div class="header">
 
@@ -44,10 +44,15 @@
 
         <div class="header-text">
 
+            <!-- Title stays in English regardless of language toggle -->
             <h1>Safety Complaint Generator</h1>
 
             <p>
-                Submit your complaint in Hindi or English
+                {% if result %}
+                    Your complaint has been processed successfully
+                {% else %}
+                    Submit your complaint in Hindi or English
+                {% endif %}
             </p>
 
         </div>
@@ -58,155 +63,15 @@
 
 <div class="container">
 
-    {% if error %}
-
-<div class="card card-error">
-
-    <div class="result-box">
-        {{ error }}
-    </div>
-
-</div>
-
-{% endif %}
-    <!-- COMPLAINT FORM -->
-
-    <div class="card">
-
-        <form action="/submit" method="POST">
-
-
-            <!-- LANGUAGE -->
-
-            <div class="form-group">
-
-                <label for="language">
-                    Language
-                </label>
-
-                <select
-                    id="language"
-                    name="language"
-                    required
-                >
-
-                    <option value="English">
-                        English
-                    </option>
-
-                    <option value="Hindi">
-                        Hindi
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- COMPLAINT -->
-
-            <div class="form-group">
-
-                <label for="complaint">
-                    Complaint
-                </label>
-
-                <textarea
-                    id="complaint"
-                    name="complaint"
-                    rows="7"
-                    placeholder="Enter your complaint here..."
-                    required
-                ></textarea>
-
-            </div>
-
-
-            <!-- DATE + TIME -->
-
-            <div class="form-row">
-
-
-                <div class="form-group">
-
-                    <label for="date">
-                        Date
-                    </label>
-
-                   <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    max="{{ today }}"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="time">
-                        Time
-                    </label>
-
-                    <input
-                        type="time"
-                        id="time"
-                        name="time"
-                    >
-
-                </div>
-
-
-            </div>
-
-
-            <!-- LOCATION -->
-
-            <div class="form-group">
-
-                <label for="location">
-                    Location
-                </label>
-
-                <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    placeholder="Enter location"
-                >
-
-            </div>
-
-
-            <!-- SUBMIT -->
-
-            <button type="submit" id="submitButton">
-    Submit Complaint
-</button>
-
-<p id="loadingMessage" style="display: none;">
-    Processing your complaint... Please wait.
-</p>
-
-
-        </form>
-
-    </div>
-
-
-
-    <!-- RESULTS -->
-
     {% if result %}
+
+    <!-- ===================== RESULTS DASHBOARD (form hidden) ===================== -->
 
     <div class="card">
 
         <h2 class="result-title">
             Complaint Analysis
         </h2>
-
-        <!-- CATEGORY + CONFIDENCE SUMMARY -->
 
         <div class="result-summary">
 
@@ -240,108 +105,123 @@
 
         </div>
 
+    </div>
+
+    <div class="card">
+
+        <h2 class="result-title">
+            Incident Overview
+        </h2>
+
         <div class="result-grid">
 
-        <div class="result-section">
+            <!-- INCIDENT DETAILS -->
 
-    <h3>
-        Incident Details
-    </h3>
+            <div class="result-section">
 
-    <div class="result-box">
+                <h3>
+                    Incident Details
+                </h3>
 
-        <p>
-            <strong>Date:</strong>
-            {{ result.date if result.date else "Not provided" }}
-        </p>
+                <div class="result-box">
 
-        <p>
-            <strong>Time:</strong>
-            {{ result.time if result.time else "Not provided" }}
-        </p>
+                    <p>
+                        <strong>Date:</strong>
+                        {{ result.date if result.date else "Not provided" }}
+                    </p>
 
-        <p>
-            <strong>Location:</strong>
-            {{ result.location if result.location else "Not provided" }}
-        </p>
+                    <p>
+                        <strong>Time:</strong>
+                        {{ result.time if result.time else "Not provided" }}
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ result.location if result.location else "Not provided" }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- ENTITIES -->
+
+            <div class="result-section">
+
+                <h3>
+                    Extracted Entities
+                </h3>
+
+                <div class="result-box">
+
+                    <ul class="entity-list">
+
+                        <li>
+                            <strong>Persons:</strong>
+                            {{ result.entities.persons }}
+                        </li>
+
+                        <li>
+                            <strong>Locations:</strong>
+                            {{ result.entities.locations }}
+                        </li>
+
+                        <li>
+                            <strong>Organizations:</strong>
+                            {{ result.entities.organizations }}
+                        </li>
+
+                        <li>
+                            <strong>Dates:</strong>
+                            {{ result.entities.dates }}
+                        </li>
+
+                        <li>
+                            <strong>Times:</strong>
+                            {{ result.entities.times }}
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
-</div>
+    <div class="card">
 
-        <!-- ENTITIES -->
+        <h2 class="result-title">
+            Safety Advice
+        </h2>
 
-        <div class="result-section">
+        <div class="result-box result-box--advice">
 
-            <h3>
-                Extracted Entities
-            </h3>
-
-            <div class="result-box">
-
-                <ul class="entity-list">
-
-                    <li>
-                        <strong>Persons:</strong>
-                        {{ result.entities.persons }}
-                    </li>
-
-                    <li>
-                        <strong>Locations:</strong>
-                        {{ result.entities.locations }}
-                    </li>
-
-                    <li>
-                        <strong>Organizations:</strong>
-                        {{ result.entities.organizations }}
-                    </li>
-
-                    <li>
-                        <strong>Dates:</strong>
-                        {{ result.entities.dates }}
-                    </li>
-
-                    <li>
-                        <strong>Times:</strong>
-                        {{ result.entities.times }}
-                    </li>
-
-                </ul>
-
-            </div>
+            {{ result.safety_advice }}
 
         </div>
 
-        </div>
+    </div>
 
+    <div class="card">
 
-        <!-- SAFETY ADVICE -->
-
-        <div class="result-section result-section--advice">
-
-            <h3>
-                Safety Advice
-            </h3>
-
-            <div class="result-box">
-
-                {{ result.safety_advice }}
-
-            </div>
-
-        </div>
+        <h2 class="result-title">
+            Formal Complaint Drafts
+        </h2>
 
         <div class="result-grid">
 
-        <!-- FORMAL ENGLISH -->
+            <!-- FORMAL ENGLISH -->
 
-        <div class="result-section">
+            <div class="result-section">
 
-            <h3>
-                Formal English Complaint
-            </h3>
+                <h3>
+                    Formal English Complaint
+                </h3>
 
-            <div class="result-box">
+                <div class="result-box">
 
     <p id="englishComplaint">
         {{ result.formal_english }}
@@ -356,17 +236,17 @@
 
 </div>
 
-        </div>
+            </div>
 
-        <!-- FORMAL HINDI -->
+            <!-- FORMAL HINDI -->
 
-        <div class="result-section">
+            <div class="result-section">
 
-            <h3>
-                Formal Hindi Complaint
-            </h3>
+                <h3>
+                    Formal Hindi Complaint
+                </h3>
 
-            <div class="result-box">
+                <div class="result-box">
 
     <p id="hindiComplaint">
         {{ result.formal_hindi }}
@@ -381,58 +261,165 @@
 
 </div>
 
-        </div>
+            </div>
 
         </div>
 
-        <!-- SIMILAR COMPLAINTS -->
-
-<div class="result-section result-section--similar">
-
-    <h3>
-        Similar Historical Complaints
-    </h3>
-
-    {% if result.similar_complaints %}
-
-        {% for complaint in result.similar_complaints %}
-
-        <div class="result-box" style="margin-bottom: 10px;">
-
-            <p>
-                <strong>Complaint:</strong>
-                {{ complaint.complaint }}
-            </p>
-
-            <p>
-                <strong>Category:</strong>
-                {{ complaint.category }}
-            </p>
-
-            <p>
-                <strong>Similarity Score:</strong>
-                {{ complaint.similarity_score }}
-            </p>
-
-        </div>
-
-        {% endfor %}
+    </div>
 
     {% else %}
 
+    <!-- ===================== INPUT FORM (shown when there is no result) ===================== -->
+
+    {% if error %}
+
+    <div class="card card-error">
+
         <div class="result-box">
-            No similar historical complaints found.
+            {{ error }}
         </div>
-
-    {% endif %}
-
-</div>
-
 
     </div>
 
     {% endif %}
 
+    <div class="card">
+
+        <form action="/submit" method="POST" target="_blank">
+
+
+            <!-- LANGUAGE -->
+
+            <div class="form-group">
+
+                <label for="language" id="languageLabel">
+                    Language
+                </label>
+
+                <select
+                    id="language"
+                    name="language"
+                    required
+                >
+
+                    <option value="English">
+                        English
+                    </option>
+
+                    <option value="Hindi">
+                        Hindi
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- COMPLAINT -->
+
+            <div class="form-group">
+
+                <label for="complaint" id="complaintLabel">
+                    Complaint
+                </label>
+
+                <textarea
+                    id="complaint"
+                    name="complaint"
+                    rows="7"
+                    placeholder="Enter your complaint here..."
+                    required
+                ></textarea>
+
+                <div style="margin-top: 12px;">
+                    <button type="button" id="toggleHindiKeyboard" class="keyboard-toggle">
+                        Enable Hindi Keyboard
+                    </button>
+                </div>
+
+                <div id="hindiKeyboard" class="hindi-keyboard" style="display: none; margin-top: 16px;">
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-600); margin-bottom: 10px;">
+                        Hindi Keyboard — Click to insert
+                    </div>
+                    <div class="keyboard-grid" id="keyboardGrid"></div>
+                </div>
+
+            </div>
+
+
+            <!-- DATE + TIME -->
+
+            <div class="form-row">
+
+
+                <div class="form-group">
+
+                    <label for="date" id="dateLabel">
+                        Date
+                    </label>
+
+                   <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    max="{{ today }}"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="time" id="timeLabel">
+                        Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="time"
+                        name="time"
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="form-group">
+
+                <label for="location" id="locationLabel">
+                    Location
+                </label>
+
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="Enter location"
+                >
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button type="submit" id="submitButton">
+    Submit Complaint
+</button>
+
+<p id="loadingMessage" style="display: none;">
+    Processing your complaint... Please wait.
+</p>
+
+
+        </form>
+
+    </div>
+
+    {% endif %}
 
 </div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
